@@ -1,2 +1,2 @@
-Функция на С++: -3
-Функция на ассемблере: -3
+A function in C++: -3
+A function in assembler: -3

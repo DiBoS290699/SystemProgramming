@@ -1,5 +1,5 @@
 /*
-*	5 вариант:	(c* b + 23) / (a / 2 - 4 * b - 1);
+*	5) (c* b + 23) / (a / 2 - 4 * b - 1);
 */
 
 #include <iostream>
@@ -9,9 +9,9 @@ using namespace std;
 long CppFunc(long& a, long& b, long& c)
 {
 	long denominator = (a / 2) - (4 * b) - 1;
-	if (!denominator)	//Проверка равенства знаменателя с нулём
+	if (!denominator)	//Check equality of the denominator to zero
 	{
-		cout << "Обнаружено деление на 0. Возвращено значение LONG_MAX" << endl;
+		cout << "Division by 0 was found. Return value LONG_MAX" << endl;
 		return LONG_MAX;
 	}
 	return (c * b + 23) / denominator;
@@ -19,7 +19,7 @@ long CppFunc(long& a, long& b, long& c)
 
 long AsmFunc(long a, long b, long c)
 {
-	int zero = 0, over = 0;
+	int er_zero = 0, er_of = 0;
 	long res;
 	//(c * b + 23) / (a / 2 - 4 * b - 1);
 	__asm
@@ -27,81 +27,82 @@ long AsmFunc(long a, long b, long c)
 		mov eax, a;		<eax> == a
 		mov ebx, 2;		<ebx> == 2
 
-		cdq;	<eax> = > <edx:eax>
-		idiv ebx;	<eax> = a / 2
-		push eax;	в стеке а / 2
+		cdq;			<eax> = > <edx:eax>
+		idiv ebx;		<eax> = a / 2
+		push eax;		on the Stack а / 2
 
 		mov eax, b;		<eax> == b
 		mov ecx, 4;		<ecx> == 4
 
-		imul ecx;	<edx:eax> == b * 4
+		imul ecx;		<edx:eax> == b * 4
+		jo err_over;	at overflow->err_over
 		mov ebx, eax;	<ebx> == b * 4
-		pop eax;	<eax> == a / 2
-		jo err_over;	при переполнении->err_over
-		dec eax;	<eax> == a / 2 - 1
+		pop eax;		<eax> == a / 2
+		dec eax;		<eax> == a / 2 - 1
+		jo err_over;	at overflow->err_over
 		sub eax, ebx;	<eax> = a / 2 - b * 4 - 1
-		jz err_zero;	если знаменатель == 0->err_zero
-		jo err_over;	при переполнении->err_over
+		jz err_zero;	if the denominator == 0->err_zero
+		jo err_over;	at overflow->err_over
 
-		push eax;	в стеке a / 2 - b * 4 - 1
+		push eax;		on the Stack a / 2 - b * 4 - 1
 
 		mov eax, c;		<eax> == c
 		mov ebx, b;		<ebx> == b
 
-		imul ebx;	<edx:eax> == c * b
-		jo err_over;	при переполнении->err_over
+		imul ebx;		<edx:eax> == c * b
+		jo err_over;	at overflow->err_over
 		add eax, 23;	<eax> == c * b + 23
-		jo err_over;	при переполнении->err_over
+		jo err_over;	at overflow->err_over
 
-		pop ebx;	<ebx> == a / 2 - b * 4 - 1
+		pop ebx;		<ebx> == a / 2 - b * 4 - 1
 
-		cdq;	<eax> = > <edx:eax>
-		idiv ebx;	<eax> == (c * b + 23) / (a / 2 - 4 * b - 1)
-		jo err_over;	при переполнении->err_over
+		cdq;			<eax> => <edx:eax>
+		idiv ebx;		<eax> == (c * b + 23) / (a / 2 - 4 * b - 1)
+		jo err_over;	at overflow->err_over
 		jmp writeRes
 
 		err_zero : 
-			mov zero, 1;		обнаружено деление на 0
+			mov er_zero, 1;		division by 0 found
 			jmp writeRes
 
 		err_over : 
-			mov over, 1;		обнаружено переполнение
+			mov er_of, 1;		overflow detected
 			jmp writeRes
 
 		writeRes :
 			mov res, eax
 	}
-	if (zero)
+	if (er_zero)
 	{
-		cout << "Обнаружено деление на 0. Возвращено значение LONG_MAX" << endl;
+		cout << "Division by 0 was found. Return value LONG_MAX" << endl;
 		return LONG_MAX;
 	}
-	else if (over)
+	else if (er_of)
 	{
-		cout << "Обнаружено переполнение. Возвращено 0" << endl;
+		cout << "Overflow detected. Returned 0" << endl;
 		return 0;
 	}
 	else return res;
 }
 
 void readValue(long& a, long& b, long& c, istream& fin) {
-	cout << "Введите три целых числа: ";
+	cout << "Enter three integers: ";
 	if (!(fin >> a >> b >> c)) {
-		cout << "Введены некорректные данные. Закрытие программы." << endl;
+		cout << "Incorrect data entered. Close the program." << endl;
 		exit(1);
 	}
 	cout << a << ' ' << b << ' ' << c << '\n';
 }
 
 void writeResult(long& cppRes, long& asmRes, ostream& fout) {
-	fout << "Функция на С++: " << cppRes << endl;
-	fout << "Функция на ассемблере: " << asmRes << endl;
+	fout << "A function in C++: " << cppRes << endl;
+	fout << "A function in assembler: " << asmRes << endl;
 }
 
 int main()
 {
 	setlocale(LC_ALL, "Rus");
-	cout << "Чтение из файла? [f-файл | иначе через консоль]\n";
+	cout << "Read from file? [f-file | else - the console]\n";
 	char read;
 	long a = 0, b = 0, c = 0;
 	read = cin.get();
@@ -123,6 +124,6 @@ int main()
 	writeResult(cppRes, asmRes, cout);
 	writeResult(cppRes, asmRes, fout);
 	fout.close();
-	cout << "Работа программы завершена" << endl;
+	cout << "The program is completed" << endl;
 	return 0;
 }
