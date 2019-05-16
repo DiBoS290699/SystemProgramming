@@ -1,0 +1,2 @@
+A function in C++: 2147483647
+A function in assembler: 2147483647
