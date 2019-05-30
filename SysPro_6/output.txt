@@ -1,0 +1,2 @@
+A function in C++: 2.14748e+09
+A function in assembler: 2.14748e+09

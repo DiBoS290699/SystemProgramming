@@ -1,0 +1,4 @@
+﻿  Asm.cpp
+C:\Users\DiBoS\Desktop\Labs\SystemProgramming\SysPro_6\Asm.cpp(84): warning C4410: недопустимый размер для операнда
+C:\Users\DiBoS\Desktop\Labs\SystemProgramming\SysPro_6\Asm.cpp(84): warning C4409: недопустимый размер инструкции
+  SysPro_6.vcxproj -> C:\Users\DiBoS\Desktop\Labs\SystemProgramming\SysPro_6\Debug\SysPro_6.exe
